@@ -1,59 +1,71 @@
-// openweather map: https://openweathermap.org/current
+let apiKey = '&APPID=1bef08da028a63f46a900504187045a6'
 let url = 'http://api.openweathermap.org/data/2.5/weather?'
-let apiKey = 'APPID=1bef08da028a63f46a900504187045a6'
-let zipCode = ''
-let country = 'us'
-let city = ''
+const input = document.querySelector('input#city-input')
 
-const getForecastByZip = () => {
-  let input = document.querySelector('input.search-by-zip-input')
-  let zipCode = input.value
-  fetch(`${url}zip=${zipCode},${country}&${apiKey}&units=imperial`).then(response => {
-    return response.json()
-  })
-    .then(weatherData => {
-      const temp = `Temperature: ${weatherData.main.temp}`
-      document.querySelector('.zip .temp').textContent = temp
-      const windSpeed = weatherData.wind.speed
-      document.querySelector('.zip .windSpeed').textContent = `Wind Speed: ${windSpeed}`
-      const sky = weatherData.weather.pop()
-      document.querySelector('.zip .sky').textContent = `${sky.main} - ${sky.description}`
+const getWeatherByCity = () => {
+  let city = `q=${input.value}`
+  fetch(`${url}${city}&units=imperial${apiKey}`)
+    .then(response => response.json())
+    .then(data => {
+      const temp = `Temperature: ${data.main.temp} `
+      document.querySelector('.city').textContent = data.name
+      document.querySelector('#temp').textContent = temp
+      document.querySelector('#humidity').textContent = data.main.humidity
     })
 }
 
-const getWeatherByCityName = () => {
-  let input = document.querySelector('input.search-by-city-input')
-  let city = input.value
-  const call = `${url}q=${city}&${apiKey}&units=imperial`
-
-  fetch(call).then(response => response.json())
-  .then(json => {
-    const temp = json.main.temp
-    document.querySelector('.city .temp').textContent = `Temperature: ${temp}`
-    const windSpeed = json.wind.speed
-    document.querySelector('.city .windSpeed').textContent = `Wind Speed: ${windSpeed}`
-    const sky = json.weather[0]
-    document.querySelector('.city .sky').textContent = `${json.weather[0].main} - ${json.weather[0].description}`
-  })
+const getWeatherByZip = () => {
+  let zip = `zip=${input.value}`
+  let country = 'us'
+  fetch(`${url}${zip},${country}&units=imperial${apiKey} `)
+    .then(response => response.json())
+    .then(data => {
+      const temp = `Temperature: ${data.main.temp}`
+      document.querySelector('.city').textContent = data.name
+      document.querySelector('#temp').textContent = temp
+      document.querySelector('#humidity').textContent = data.main.humidity
+    })
 }
 
-// const getRandomBeer = () => {
-//   fetch('https://api.punkapi.com/v2/beers/random').then(response => {
-//     return response.json()
-//   })
-//     .then(json => {
-//       return json[0]
-//     })
-// }
+const getBeers = () => {
+  fetch('http://api.punkapi.com/v2/beers?abv_gt=4')
+    .then(response => response.json())
+    .then(beers => {
+      beers.map(beer => {
+        const li = document.createElement('li')
+        li.textContent = beer.name
+        document.body.appendChild(li)
+      })
+      console.log(beers)
+      beers.filter(beer => {
+        console.log(beer.name === 'Buzz')
+        if (beer.name === 'Buzz') {
+          console.log(beer)
+        }
+      })
+    })
+}
+
+const getBeerDetails = () => {
+  const beerInput = document.querySelector('#beer-input').value
+  fetch('http://api.punkapi.com/v2/beers?abv_gt=4')
+    .then(response => response.json())
+    .then(json => {
+      json.filter(obj => {
+        if (obj.name === beerInput) {
+          document.querySelector('.beer-name').textContent = obj.name
+          document.querySelector('.beer-tagline').textContent = obj.tagline
+          document.querySelector('.beer-description').textContent = obj.description
+        }
+      })
+    })
+}
 
 const main = () => {
-  getWeatherByCityName()
-  let zipSearchButton = document.querySelector('button.search-by-zip-button')
-  zipSearchButton.addEventListener('click', getForecastByZip)
-  
-  let citySearchButton = document.querySelector('button.search-by-city-button')
-  citySearchButton.addEventListener('click', getWeatherByCityName)
-  // }
+  getBeers()
+  document.querySelector('#city-input-button').addEventListener('click', getWeatherByCity)
+  document.querySelector('#zipcode-button').addEventListener('click', getWeatherByZip)
+  document.querySelector('#beer-button').addEventListener('click', getBeerDetails)
 }
 
 document.addEventListener('DOMContentLoaded', main)
